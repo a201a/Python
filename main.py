@@ -12,7 +12,7 @@ api_url_sharh = 'https://dorar-hadith-api-production.up.railway.app/v1/site/shar
 
 bot = telebot.TeleBot(token)
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start',@'درجة'])
 def start(message):
     chat_id = message.chat.id
     start_message = "مرحبًا بك في بوت الحديث الشريف!\n\n" \
