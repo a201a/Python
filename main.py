@@ -9,7 +9,7 @@ api_url_hadith = 'https://dorar-hadith-api-production.up.railway.app/v1/api/hadi
 api_url_degree = 'https://dorar-hadith-api-production.up.railway.app/v1/data/degree'
 api_url_book = 'https://dorar-hadith-api-production.up.railway.app/v1/site/book/'
 api_url_sharh = 'https://dorar-hadith-api-production.up.railway.app/v1/site/sharh/text/'
-
+api_url_mohdith = 'https://dorar-hadith-api-production.up.railway.app/v1/site/mohdith/'
 bot = telebot.TeleBot(token)
 
 @bot.message_handler(commands=['start'])
@@ -20,8 +20,8 @@ def start(message):
                     "/حديث [البحث عن حديث]\n" \
                     "/درجة [عرض درجات الأحاديث]\n" \
                     "/الكتاب [معلومات عن كتاب]\n" \
-                    "/شرح [عرض شرح لحديث]"
-
+                    "/شرح [عرض شرح لحديث]\n" \
+                    "/المحدث [معلومات عن المحدث]"
     bot.send_message(chat_id, start_message)
 
 @bot.message_handler(func=lambda message: message.text.lower() == 'مسح')
@@ -130,6 +130,29 @@ def get_hadith_sharh(message):
     except Exception as error:
         print('Unexpected error:', error)
         bot.send_message(chat_id, 'حدث خطأ غير متوقع.')
+
+@bot.message_handler(commands=['المحدث'])
+def get_mohdith_info(message):
+    chat_id = message.chat.id
+    mohdith_id = message.text.split(' ', 1)[1]
+
+    try:
+        response = requests.get(api_url_mohdith + mohdith_id)
+        response.raise_for_status()
+        mohdith_info = response.json()['data']
+        formatted_mohdith_info = (
+            f"اسم المحدث: {mohdith_info['name']}\n"
+            f"رقم المحدث: {mohdith_info['mohdithId']}\n"
+            f"معلومات عن المحدث: {mohdith_info['info']}\n"
+        )
+        bot.send_message(chat_id, formatted_mohdith_info)
+    except requests.exceptions.RequestException as request_error:
+        print('Error making request:', request_error)
+        bot.send_message(chat_id, 'حدث خطأ أثناء جلب معلومات المحدث.')
+    except Exception as error:
+        print('Unexpected error:', error)
+        bot.send_message(chat_id, 'حدث خطأ غير متوقع.')
+
 
 if __name__ == "__main__":
     bot.polling()
